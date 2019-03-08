@@ -1,0 +1,149 @@
+
+\documentclass[border=8pt, multi, tikz]{standalone}
+\usepackage{import}
+\subimport{layers/}{init}
+\usetikzlibrary{positioning}
+\usetikzlibrary{3d} %for including external image
+
+\def\ConvColor{rgb:yellow,5;red,2.5;white,5}
+\def\ConvReluColor{rgb:yellow,5;red,5;white,5}
+\def\PoolColor{rgb:red,1;black,0.3}
+\def\UnpoolColor{rgb:blue,2;green,1;black,0.3}
+\def\FcColor{rgb:blue,5;red,2.5;white,5}
+\def\FcReluColor{rgb:blue,5;red,5;white,4}
+\def\SoftmaxColor{rgb:magenta,5;black,7}
+
+\newcommand{\copymidarrow}{\tikz \draw[-Stealth,line width=0.8mm,draw={rgb:blue,4;red,1;green,1;black,3}] (-0.3,0) -- ++(0.3,0);}
+
+\begin{document}
+\begin{tikzpicture}
+\tikzstyle{connection}=[ultra thick,every node/.style={sloped,allow upside down},draw=\edgecolor,opacity=0.7]
+\tikzstyle{copyconnection}=[ultra thick,every node/.style={sloped,allow upside down},draw={rgb:blue,4;red,1;green,1;black,3},opacity=0.7]
+
+\node[canvas is zy plane at x=0][opacity=1] (temp) at (-1,0,0) {\includegraphics[width=6.826666666666667cm,height=5.120000000000001cm]{IMG_1563_IMG.png}};
+
+\pic[shift={(0,0,0)}] at (0,0,0)
+    {Box={
+        name=conv_2,
+        caption= ,
+        xlabel={{16, }},
+        zlabel=2048,
+        fill=\ConvColor,
+        height=25.6,
+        width=1,
+        depth=34.13333333333333
+        }
+    };
+
+\pic[shift={ (0,0,0) }] at (conv_2-east)
+    {Box={
+        name=pool_3,
+        caption= ,
+        fill=\PoolColor,
+        opacity=0.5,
+        height=14.287632039711928,
+        width=1,
+        depth=19.05017605294924
+        }
+    };
+
+\pic[shift={(1,0,0)}] at (pool_3-east)
+    {Box={
+        name=conv_4,
+        caption= ,
+        xlabel={{32, }},
+        zlabel=512,
+        fill=\ConvColor,
+        height=14.287632039711928,
+        width=1,
+        depth=19.05017605294924
+        }
+    };
+
+\draw [connection]  (pool_3-east)    -- node {\midarrow} (conv_4-west);
+
+\pic[shift={ (0,0,0) }] at (conv_4-east)
+    {Box={
+        name=pool_5,
+        caption= ,
+        fill=\PoolColor,
+        opacity=0.5,
+        height=7.974079269617299,
+        width=1,
+        depth=10.632105692823067
+        }
+    };
+
+\pic[shift={(1,0,0)}] at (pool_5-east)
+    {Box={
+        name=conv_6,
+        caption= ,
+        xlabel={{48, }},
+        zlabel=128,
+        fill=\ConvColor,
+        height=7.974079269617299,
+        width=1,
+        depth=10.632105692823067
+        }
+    };
+
+\draw [connection]  (pool_5-east)    -- node {\midarrow} (conv_6-west);
+
+\pic[shift={ (0,0,0) }] at (conv_6-east)
+    {Box={
+        name=pool_7,
+        caption= ,
+        fill=\PoolColor,
+        opacity=0.5,
+        height=4.4504183773354224,
+        width=1,
+        depth=5.933891169780565
+        }
+    };
+
+\pic[shift={(1,0,0)}] at (pool_7-east)
+    {Box={
+        name=conv_8,
+        caption= ,
+        xlabel={{64, }},
+        zlabel=32,
+        fill=\ConvColor,
+        height=4.4504183773354224,
+        width=1,
+        depth=5.933891169780565
+        }
+    };
+
+\draw [connection]  (pool_7-east)    -- node {\midarrow} (conv_8-west);
+
+\pic[shift={ (0,0,0) }] at (conv_8-east)
+    {Box={
+        name=pool_9,
+        caption= ,
+        fill=\PoolColor,
+        opacity=0.5,
+        height=3.2102982614314612,
+        width=1,
+        depth=4.280397681908616
+        }
+    };
+
+\pic[shift={(1,0,0)}] at (pool_9-east)
+    {Box={
+        name=END,
+        caption=Discriminator Logits,
+        xlabel={{1, }},
+        zlabel=16,
+        fill=\ConvColor,
+        height=3.2102982614314612,
+        width=0.0,
+        depth=4.280397681908616
+        }
+    };
+
+\draw [connection]  (pool_9-east)    -- node {\midarrow} (END-west);
+
+\node[canvas is zy plane at x=0][opacity=0.5] (temp) at (END-east) {\includegraphics[width=0.8560795363817232cm,height=0.6420596522862922cm]{IMG_1563_SPARSE.png}};
+
+\end{tikzpicture}
+\end{document}
