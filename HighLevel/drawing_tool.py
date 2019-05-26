@@ -39,8 +39,8 @@ class Model_Drawing:
     self.lab_width = w
 
     # Setup figure height and width for drawing purposes
-    self.cur_height= h / 6
-    self.cur_width = w / 6
+    self.cur_height= h/2
+    self.cur_width = w /2
     self.cur_depth = 3
 
     # Get and add the initial image to the file. NOTE: You cannot add a "from"
@@ -106,8 +106,8 @@ class Model_Drawing:
   #                                                               W->D
   #                                                               D->W
   # By default utilizes log scaling.
-  def add_conv( self, kernel, stride = None, offset="(1,0,0)", name = None, to = None, caption = ' ' ):
-    k_h,k_w,self.cur_depth = kernel
+  def add_conv( self, kernel, stride = None, offset="(1,0,0)", name = None, to = None, caption = ' ', color = '\\ConvColor' ):
+    k_h,k_w,k_c = kernel
     if name is None:
       name = 'conv_%d'%self.layer_num
     c,h,w = self.get_params(stride)
@@ -120,19 +120,21 @@ class Model_Drawing:
     # DISAMBIGUATIONS LISTED BELOW.
     self.arch.append( to_Conv( name=name,              # The name of the layer for internal use
                           s_filer=int(self.lab_width), # Dimension Label
-                          n_filer=int(self.cur_depth), # Channel Label
+                          n_filer=k_c,                # Channel Label
                           offset=offset,               # Offset distance from to parameter
                           to=to,                       # The previous state in the network
                           width= c,                    # The depth  of the generated layer
                           height=h,                    # The height of the generated layer
                           depth= w,                    # The width  of the generated layer
-                          caption=caption
+                          caption=caption,
+                          color= color
                           ) )
     try:
       self.arch.append( to_connection(self.cur_layer, name) )
     except:
       pass
     self.cur_layer = name
+    self.cur_depth = k_c
 
   def add_pool(self, stride = 2, offset="(0,0,0)", name = None, caption = ' ' ):
     if name is None:
@@ -183,8 +185,46 @@ class Model_Drawing:
     self.arch.append(to_input(image,to=to,width=w*.2,height=h*.2,opacity=opacity))
 
 
-  def add_skip(self, from_layer, to_layer ):
-    self.arch.append( to_skip( of=from_layer, to=to_layer, pos=1.25) )
+  def add_skip(self, from_layer, to_layer, pos = 1.25 ):
+    self.arch.append( to_skip( of=from_layer, to=to_layer, pos=pos) )
+
+  def add_dense_block(self,kernel,kmap, offset="(1,0,0)", name = None, to = None, caption = ' ' ):
+    k_h,k_w,k_c = kernel
+    if name is None:
+      name = 'dense_%d'%self.layer_num
+    c,h,w = self.get_params(1)
+    layers = [name+"_%d"%n for n in range(kmap)]
+    layers = layers + [name+'_concat']
+
+    # DISAMBIGUATIONS LISTED BELOW.
+    for x in range(len(layers)):
+      color='\\ConvColor' if x is not len(layers)-1 else '\\SoftmaxColor'
+      k_c = self.cur_depth + k_c * kmap if x is len(layers)-1 else k_c
+      offset = "(.25,0,0)" if x is not len(layers)-1 else "(.5,0,0)"
+      layer = layers[x]
+      if to is None :
+        to = "%s-east"%self.cur_layer
+        offset = "(1,0,0)"
+      if to != '(0,0,0)':
+        to = f_n(to)
+      self.arch.append( to_Conv( name=layer,             # The name of the layer for internal use
+                            s_filer=int(self.lab_width), # Dimension Label
+                            n_filer=k_c,                 # Channel Label
+                            offset=offset,               # Offset distance from to parameter
+                            to=to,                       # The previous state in the network
+                            width= c,                    # The depth  of the generated layer
+                            height=h,                    # The height of the generated layer
+                            depth= w,                    # The width  of the generated layer
+                            caption=caption,
+                            color=color
+                            ) )
+      to = layer + '-east'
+
+
+    self.arch.append(to_dense([self.cur_layer] + layers))
+
+    self.cur_layer = layers[-1]
+    self.cur_depth = k_c
 
   def generate(self,file):
     self.arch.append(to_end())

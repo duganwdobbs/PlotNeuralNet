@@ -9,6 +9,7 @@ def to_head( projectpath ):
 \subimport{"""+ pathlayers + r"""}{init}
 \usetikzlibrary{positioning}
 \usetikzlibrary{3d} %for including external image
+\usetikzlibrary{calc}
 """
 
 def to_cor():
@@ -40,7 +41,7 @@ def to_input( pathfile, offset="(temp)", to='(-3,0,0)', width=8, height=8, opaci
 """
 
 # Conv
-def to_Conv( name, s_filer=256, n_filer=64, offset="(0,0,0)", to="(0,0,0)", width=1, height=40, depth=40, caption=" " ):
+def to_Conv( name, s_filer=256, n_filer=64, offset="(0,0,0)", to="(0,0,0)", width=1, height=40, depth=40, caption=" " , color="\\ConvColor" ):
     return r"""
 \pic[shift={"""+ offset +"""}] at """+ to +"""
     {Box={
@@ -48,7 +49,7 @@ def to_Conv( name, s_filer=256, n_filer=64, offset="(0,0,0)", to="(0,0,0)", widt
         caption="""+ caption +r""",
         xlabel={{"""+ str(n_filer) +""", }},
         zlabel="""+ str(s_filer) +""",
-        fill=\ConvColor,
+        fill="""+ str(color) +""",
         height="""+ str(height) +""",
         width="""+ str(width) +""",
         depth="""+ str(depth) +"""
@@ -175,12 +176,44 @@ def to_connection( of, to):
 def to_skip( of, to, pos=1.25):
     return r"""
 \path ("""+ of +"""-southeast) -- ("""+ of +"""-northeast) coordinate[pos="""+ str(pos) +"""] ("""+ of +"""-top) ;
-\path ("""+ to +"""-south)  -- ("""+ to +"""-north)  coordinate[pos=1.25] ("""+ to +"""-top) ;
+\path ("""+ to +"""-south)  -- ("""+ to +"""-north)  coordinate[pos="""+ str(pos) +"""] ("""+ to +"""-top) ;
 \draw [copyconnection]  ("""+of+"""-northeast)
 -- node {\copymidarrow}("""+of+"""-top)
 -- node {\copymidarrow}("""+to+"""-top)
 -- node {\copymidarrow} ("""+to+"""-north);
 """
+
+# Receives an array of layers, draws a bunch of skip connections between them
+#   for a dense block.
+def to_dense(of):
+  kmap = len(of)
+  arch = ''
+  for x in range(len(of)-1):
+    for y in range(len(of[x:])):
+      if y == 0:
+        arch = arch + to_dense_pos_east(of[x:][y],1 + kmap/50 *(y+1))
+      else:
+        arch = arch + to_dense_pos_west(of[x:][y],1 + kmap/50 *(y+1))
+    for y in range(len(of[x+1:])):
+      arch = arch + to_dense_line(of[x],of[x+1:][y])
+  return arch
+
+def to_dense_line( of, to, pos=1.25):
+    return r"""
+\draw [red]   ("""+ of +"""-northeast) to[out=90, in=180] ($("""+ of +"""-top)!0.5!("""+ to +"""-top)$);
+\draw [red]   ($("""+ of +"""-top)!0.5!("""+ to +"""-top)$) to[out=0, in=90 ] ("""+ to +"""-northwest);
+"""
+
+def to_dense_pos_east( of, pos=1.25):
+    return r"""
+\path ("""+ of +"""-southeast) -- ("""+ of +"""-northeast) coordinate[pos="""+ str(pos) +"""] ("""+ of +"""-top);
+"""
+
+def to_dense_pos_west( of, pos=1.25):
+    return r"""
+\path ("""+ of +"""-southwest) -- ("""+ of +"""-northwest) coordinate[pos="""+ str(pos) +"""] ("""+ of +"""-top);
+"""
+
 
 def to_end():
     return r"""
