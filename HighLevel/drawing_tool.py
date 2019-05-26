@@ -19,7 +19,7 @@ class Model_Drawing:
   # Parameters: image - This is a path to an image to write to the file. Image
   #                     size is pulled from here as well for drawing the
   #                     diagrams
-  def __init__(self, image):
+  def __init__(self, image, draw = True):
     # Initial layers and setup
     self.arch = [to_head(''),
                  to_cor(),
@@ -45,7 +45,8 @@ class Model_Drawing:
 
     # Get and add the initial image to the file. NOTE: You cannot add a "from"
     #   field to this.
-    self.add_image(image)
+    if(draw):
+      self.add_image(image)
     c,h,w = self.get_params(1)
 
   # Internal wrapper for readability to increase the layer number
@@ -65,7 +66,7 @@ class Model_Drawing:
     # If there is no stride or stride is 1, don't do striding.
     if stride is not None and stride is not 1:
       # If we stride by different numbers in each dimension, handle it.
-      if isinstance(stride,tuple) is 'tuple' and len(stride) == 2:
+      if isinstance(stride,tuple) and len(stride) == 2:
         s_h,s_w = stride
         l_h,l_w = stride
       else:
@@ -156,12 +157,63 @@ class Model_Drawing:
 
     self.cur_layer = name
 
-  def add_unpool( self, kernel, stride = None, offset="(1,0,0)", name = None, to = None, caption = ' ' ):
+  def add_unpool_xy( self, kernel, stride = None, offset="(1,0,0)", name = None, to = None, caption = ' ' ):
+    if stride is not None and stride is not 1:
+      # If we stride by different numbers in each dimension, handle it.
+      if isinstance(stride,tuple) is 'tuple' and len(stride) == 2:
+        s_h,s_w = stride
+        l_h,l_w = stride
+      else:
+        s_h,s_w = stride,stride
+        l_h,l_w = stride,stride
+
+    if name is None:
+      name = 'unpool_xy_%d'%self.layer_num
+    if to is None:
+      to = "%s-east"%self.cur_layer
+
+    stride_x = ( 1,s_w)
+    stride_y = (s_h, 1)
+    if kernel is None:
+      k1 = (3,3,self.cur_depth//2)
+      k2 = (3,3,self.cur_depth//4)
+    else:
+      v1,v2,v3 = kernel
+      k1 = (v1,v2,v3)
+      k2 = (v1,v2,v3//2)
+
+
+    cur_size = (self.cur_height,self.cur_width,self.lab_height,self.lab_width)
+    offset_z = self.cur_width / 50
+
+    self.add_unpool(k1,stride_x,offset="(2,0, %d)"%offset_z,name=name + '_x' ,to=to) # x
+    self.add_unpool(k2,stride_y,offset="(2,0, 0)",name=name + '_xy'      ) # xy
+
+    # Restore saved size.
+    self.cur_height,self.cur_width,self.lab_height,self.lab_width = cur_size
+    print(self.cur_height,self.cur_width,self.lab_height,self.lab_width)
+
+    self.add_unpool(k1,stride_y,offset="(2,0,-%d)"%offset_z,name=name + '_y' ,to=to) # y
+    self.add_unpool(k2,stride_x,offset="(2,0, 0)",name=name + '_yx'      ) # yx
+
+    self.add_conv( kernel, offset="(6,0,0)", name = name + '_comp', to = to ,color='\\FcReluColor')
+    self.arch.append( to_connection( name + '_xy',self.cur_layer) )
+    self.arch.append( to_connection( name + '_yx',self.cur_layer) )
+
+    self.cur_height,self.cur_width,self.lab_height,self.lab_width = cur_size
+    c,h,w = self.get_params(stride, unpool = True )
+
+
+
+
+
+  def add_unpool( self, kernel, stride = None, offset="(1,0,0)", name = None, to = None, caption = ' ', connection = True ):
     k_h,k_w,self.cur_depth = kernel
     if name is None:
       name = 'unpool_%d'%self.layer_num
     c,h,w = self.get_params( stride, unpool = True )
-    to = "%s-east"%self.cur_layer
+    if to is None:
+      to = "%s-east"%self.cur_layer
 
     # DISAMBIGUATIONS LISTED BELOW.
     self.arch.append( to_UnPool( name=name,              # The name of the layer for internal use
@@ -174,7 +226,8 @@ class Model_Drawing:
                             depth=w,                     # The width  of the generated layer
                             caption=caption
                             ) )
-    self.arch.append( to_connection(self.cur_layer, name) )
+    if connection:
+      self.arch.append( to_connection(to, name) )
     self.cur_layer = name
 
   def add_image(self,image,offset=None,to="(-1,0,0)",opacity=1):
@@ -182,10 +235,11 @@ class Model_Drawing:
     c,h,w = self.get_params()
     if offset is not None:
       to = f_n(to+"-east")
+    image = image.split('/')[-1]
     self.arch.append(to_input(image,to=to,width=w*.2,height=h*.2,opacity=opacity))
 
-
   def add_skip(self, from_layer, to_layer, pos = 1.25 ):
+    print(self.lab_height,self.lab_width)
     self.arch.append( to_skip( of=from_layer, to=to_layer, pos=pos) )
 
   def add_dense_block(self,kernel,kmap, offset="(1,0,0)", name = None, to = None, caption = ' ' ):

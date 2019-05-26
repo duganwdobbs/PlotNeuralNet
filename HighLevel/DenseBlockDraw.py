@@ -1,8 +1,11 @@
 from drawing_tool import Model_Drawing
 
-filename = "DenseModel"
-image    = '13_0_img.png'
-gt       = '13_0_log.png'
+import os
+cwd = os.getcwd()
+
+filename = "Highlevel/DenseModel"
+image    = 'Highlevel/13_0_img.png'
+gt       = 'Highlevel/13_0_log.png'
 
 model = Model_Drawing(image)
 model.add_conv(kernel=(7,7,12),to="(0,0,0)",offset="(0,0,0)",name="Atrous",color='\\ConvReluColor')

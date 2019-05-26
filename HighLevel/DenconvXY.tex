@@ -1,0 +1,121 @@
+
+\documentclass[border=8pt, multi, tikz]{standalone}
+\usepackage{import}
+\subimport{layers/}{init}
+\usetikzlibrary{positioning}
+\usetikzlibrary{3d} %for including external image
+\usetikzlibrary{calc}
+
+\def\ConvColor{rgb:yellow,5;red,2.5;white,5}
+\def\ConvReluColor{rgb:yellow,5;red,5;white,5}
+\def\PoolColor{rgb:red,1;black,0.3}
+\def\UnpoolColor{rgb:blue,2;green,1;black,0.3}
+\def\FcColor{rgb:blue,5;red,2.5;white,5}
+\def\FcReluColor{rgb:blue,5;red,5;white,4}
+\def\SoftmaxColor{rgb:magenta,5;black,7}
+
+\newcommand{\copymidarrow}{\tikz \draw[-Stealth,line width=0.8mm,draw={rgb:blue,4;red,1;green,1;black,3}] (-0.3,0) -- ++(0.3,0);}
+
+\begin{document}
+\begin{tikzpicture}
+\tikzstyle{connection}=[ultra thick,every node/.style={sloped,allow upside down},draw=\edgecolor,opacity=0.7]
+\tikzstyle{copyconnection}=[ultra thick,every node/.style={sloped,allow upside down},draw={rgb:blue,4;red,1;green,1;black,3},opacity=0.7]
+
+\pic[shift={(0,0,0)}] at (0,0,0)
+    {Box={
+        name=conv_2,
+        caption= ,
+        xlabel={{360, }},
+        zlabel=220,
+        fill=\ConvColor,
+        height=7.213475204444817,
+        width=1,
+        depth=15.869645449778599
+        }
+    };
+
+\pic[shift={ (2,0, 3) }] at (conv_2-east)
+    {Box={
+        name=Dest3_x,
+        caption= ,
+        xlabel={{180, }},
+        zlabel=440,
+        fill=\UnpoolColor,
+        opacity=0.5,
+        height=7.924812503605783,
+        width=1,
+        depth=22.000000000000004
+        }
+    };
+
+\draw [connection]  (conv_2-east)    -- node {\midarrow} (Dest3_x-west);
+
+\pic[shift={ (2,0, 0) }] at (Dest3_x-east)
+    {Box={
+        name=Dest3_xy,
+        caption= ,
+        xlabel={{90, }},
+        zlabel=440,
+        fill=\UnpoolColor,
+        opacity=0.5,
+        height=10.9861228866811,
+        width=1,
+        depth=24.16947035069842
+        }
+    };
+
+\draw [connection]  (Dest3_x-east)    -- node {\midarrow} (Dest3_xy-west);
+
+\pic[shift={ (2,0,-3) }] at (conv_2-east)
+    {Box={
+        name=Dest3_y,
+        caption= ,
+        xlabel={{180, }},
+        zlabel=220,
+        fill=\UnpoolColor,
+        opacity=0.5,
+        height=10.000000000000002,
+        width=1,
+        depth=17.434587507932722
+        }
+    };
+
+\draw [connection]  (conv_2-east)    -- node {\midarrow} (Dest3_y-west);
+
+\pic[shift={ (2,0, 0) }] at (Dest3_y-east)
+    {Box={
+        name=Dest3_yx,
+        caption= ,
+        xlabel={{90, }},
+        zlabel=440,
+        fill=\UnpoolColor,
+        opacity=0.5,
+        height=10.986122886681098,
+        width=1,
+        depth=24.16947035069842
+        }
+    };
+
+\draw [connection]  (Dest3_y-east)    -- node {\midarrow} (Dest3_yx-west);
+
+\pic[shift={(6,0,0)}] at (conv_2-east)
+    {Box={
+        name=Dest3_comp,
+        caption= ,
+        xlabel={{180, }},
+        zlabel=440,
+        fill=\FcReluColor,
+        height=10.986122886681098,
+        width=1,
+        depth=24.16947035069842
+        }
+    };
+
+\draw [connection]  (Dest3_yx-east)    -- node {\midarrow} (Dest3_comp-west);
+
+\draw [connection]  (Dest3_xy-east)    -- node {\midarrow} (Dest3_comp-west);
+
+\draw [connection]  (Dest3_yx-east)    -- node {\midarrow} (Dest3_comp-west);
+
+\end{tikzpicture}
+\end{document}

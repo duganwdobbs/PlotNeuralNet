@@ -169,8 +169,10 @@ def to_SoftMax( name, s_filer=10, offset="(0,0,0)", to="(0,0,0)", width=1.5, hei
 
 
 def to_connection( of, to):
+    of = of if '-east' in of else of + '-east'
+    to = to if '-west' in to else to + '-west'
     return r"""
-\draw [connection]  ("""+of+"""-east)    -- node {\midarrow} ("""+to+"""-west);
+\draw [connection]  ("""+of+""")    -- node {\midarrow} ("""+to+""");
 """
 
 def to_skip( of, to, pos=1.25):
@@ -225,5 +227,5 @@ def to_end():
 def to_generate( arch, pathname="file.tex" ):
     with open(pathname, "w") as f:
         for c in arch:
-            print(c)
+            # print(c)
             f.write( c )
