@@ -26,6 +26,7 @@
         name=conv_2,
         caption= ,
         xlabel={{360, }},
+        ylabel=100,
         zlabel=220,
         fill=\ConvColor,
         height=7.213475204444817,
@@ -34,11 +35,12 @@
         }
     };
 
-\pic[shift={ (2,0, 3) }] at (conv_2-east)
+\pic[shift={ (3,0, 4) }] at (conv_2-east)
     {Box={
         name=Dest3_x,
         caption= ,
         xlabel={{180, }},
+        ylabel=100,
         zlabel=440,
         fill=\UnpoolColor,
         opacity=0.5,
@@ -50,11 +52,12 @@
 
 \draw [connection]  (conv_2-east)    -- node {\midarrow} (Dest3_x-west);
 
-\pic[shift={ (2,0, 0) }] at (Dest3_x-east)
+\pic[shift={ (3,0, 0) }] at (Dest3_x-east)
     {Box={
         name=Dest3_xy,
         caption= ,
         xlabel={{90, }},
+        ylabel=200,
         zlabel=440,
         fill=\UnpoolColor,
         opacity=0.5,
@@ -66,11 +69,12 @@
 
 \draw [connection]  (Dest3_x-east)    -- node {\midarrow} (Dest3_xy-west);
 
-\pic[shift={ (2,0,-3) }] at (conv_2-east)
+\pic[shift={ (3,0,-4) }] at (conv_2-east)
     {Box={
         name=Dest3_y,
         caption= ,
         xlabel={{180, }},
+        ylabel=200,
         zlabel=220,
         fill=\UnpoolColor,
         opacity=0.5,
@@ -82,11 +86,12 @@
 
 \draw [connection]  (conv_2-east)    -- node {\midarrow} (Dest3_y-west);
 
-\pic[shift={ (2,0, 0) }] at (Dest3_y-east)
+\pic[shift={ (3,0, 0) }] at (Dest3_y-east)
     {Box={
         name=Dest3_yx,
         caption= ,
         xlabel={{90, }},
+        ylabel=200,
         zlabel=440,
         fill=\UnpoolColor,
         opacity=0.5,
@@ -98,11 +103,12 @@
 
 \draw [connection]  (Dest3_y-east)    -- node {\midarrow} (Dest3_yx-west);
 
-\pic[shift={(6,0,0)}] at (conv_2-east)
+\pic[shift={(9,0,0)}] at (conv_2-east)
     {Box={
         name=Dest3_comp,
         caption= ,
         xlabel={{180, }},
+        ylabel=200,
         zlabel=440,
         fill=\FcReluColor,
         height=10.986122886681098,

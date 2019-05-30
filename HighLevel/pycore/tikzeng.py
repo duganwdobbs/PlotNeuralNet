@@ -41,13 +41,14 @@ def to_input( pathfile, offset="(temp)", to='(-3,0,0)', width=8, height=8, opaci
 """
 
 # Conv
-def to_Conv( name, s_filer=256, n_filer=64, offset="(0,0,0)", to="(0,0,0)", width=1, height=40, depth=40, caption=" " , color="\\ConvColor" ):
+def to_Conv( name, s_filer=256, o_filer="", n_filer=64, offset="(0,0,0)", to="(0,0,0)", width=1, height=40, depth=40, caption=" " , color="\\ConvColor" ):
     return r"""
 \pic[shift={"""+ offset +"""}] at """+ to +"""
     {Box={
         name=""" + name +""",
         caption="""+ caption +r""",
         xlabel={{"""+ str(n_filer) +""", }},
+        ylabel="""+ str(o_filer) +""",
         zlabel="""+ str(s_filer) +""",
         fill="""+ str(color) +""",
         height="""+ str(height) +""",
@@ -95,13 +96,14 @@ def to_Pool(name, offset="(0,0,0)", to="(0,0,0)", width=1, height=32, depth=32, 
 """
 
 # unpool4,
-def to_UnPool(name, s_filer=256, n_filer=64, offset="(0,0,0)", to="(0,0,0)", width=1, height=32, depth=32, opacity=0.5, caption=" "):
+def to_UnPool(name, s_filer=256, o_filer="", n_filer=64, offset="(0,0,0)", to="(0,0,0)", width=1, height=32, depth=32, opacity=0.5, caption=" "):
     return r"""
 \pic[shift={ """+ offset +""" }] at """+ to +"""
     {Box={
         name="""+ name +r""",
         caption="""+ caption +r""",
         xlabel={{"""+ str(n_filer) +""", }},
+        ylabel="""+ str(o_filer) +""",
         zlabel="""+ str(s_filer) +""",
         fill=\\UnpoolColor,
         opacity="""+ str(opacity) +""",

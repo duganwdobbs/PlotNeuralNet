@@ -107,7 +107,7 @@ class Model_Drawing:
   #                                                               W->D
   #                                                               D->W
   # By default utilizes log scaling.
-  def add_conv( self, kernel, stride = None, offset="(1,0,0)", name = None, to = None, caption = ' ', color = '\\ConvColor' ):
+  def add_conv( self, kernel, stride = None, offset="(1,0,0)",o_filter="", name = None, to = None, caption = ' ', color = '\\ConvColor' ):
     k_h,k_w,k_c = kernel
     if name is None:
       name = 'conv_%d'%self.layer_num
@@ -119,14 +119,15 @@ class Model_Drawing:
       to = f_n(to)
 
     # DISAMBIGUATIONS LISTED BELOW.
-    self.arch.append( to_Conv( name=name,              # The name of the layer for internal use
-                          s_filer=int(self.lab_width), # Dimension Label
-                          n_filer=k_c,                # Channel Label
-                          offset=offset,               # Offset distance from to parameter
-                          to=to,                       # The previous state in the network
-                          width= c,                    # The depth  of the generated layer
-                          height=h,                    # The height of the generated layer
-                          depth= w,                    # The width  of the generated layer
+    self.arch.append( to_Conv( name=name,               # The name of the layer for internal use
+                          s_filer=int(self.lab_width),  # Dimension Label
+                          # o_filer=int(self.lab_height), # Channel Label
+                          n_filer=k_c,                  # Channel Label
+                          offset=offset,                # Offset distance from to parameter
+                          to=to,                        # The previous state in the network
+                          width= c,                     # The depth  of the generated layer
+                          height=h,                     # The height of the generated layer
+                          depth= w,                     # The width  of the generated layer
                           caption=caption,
                           color= color
                           ) )
@@ -184,19 +185,19 @@ class Model_Drawing:
 
 
     cur_size = (self.cur_height,self.cur_width,self.lab_height,self.lab_width)
-    offset_z = self.cur_width / 50
+    offset_z = self.cur_width / 35
 
-    self.add_unpool(k1,stride_x,offset="(2,0, %d)"%offset_z,name=name + '_x' ,to=to) # x
-    self.add_unpool(k2,stride_y,offset="(2,0, 0)",name=name + '_xy'      ) # xy
+    self.add_unpool(k1,stride_x,offset="(3,0, %d)"%offset_z,name=name + '_x' ,to=to) # x
+    self.add_unpool(k2,stride_y,offset="(3,0, 0)",name=name + '_xy'      ) # xy
 
     # Restore saved size.
     self.cur_height,self.cur_width,self.lab_height,self.lab_width = cur_size
     print(self.cur_height,self.cur_width,self.lab_height,self.lab_width)
 
-    self.add_unpool(k1,stride_y,offset="(2,0,-%d)"%offset_z,name=name + '_y' ,to=to) # y
-    self.add_unpool(k2,stride_x,offset="(2,0, 0)",name=name + '_yx'      ) # yx
+    self.add_unpool(k1,stride_y,offset="(3,0,-%d)"%offset_z,name=name + '_y' ,to=to) # y
+    self.add_unpool(k2,stride_x,offset="(3,0, 0)",name=name + '_yx'      ) # yx
 
-    self.add_conv( kernel, offset="(6,0,0)", name = name + '_comp', to = to ,color='\\FcReluColor')
+    self.add_conv( kernel, offset="(9,0,0)", name = name + '_comp', to = to ,color='\\FcReluColor')
     self.arch.append( to_connection( name + '_xy',self.cur_layer) )
     self.arch.append( to_connection( name + '_yx',self.cur_layer) )
 
@@ -218,6 +219,7 @@ class Model_Drawing:
     # DISAMBIGUATIONS LISTED BELOW.
     self.arch.append( to_UnPool( name=name,              # The name of the layer for internal use
                             s_filer=int(self.lab_width), # Dimension Label
+                            # o_filer=int(self.lab_height),# Height Label
                             n_filer=int(self.cur_depth), # Channel Label
                             offset=offset,               # Offset distance from to parameter
                             to=f_n(to),                  # The previous state in the network
@@ -258,7 +260,7 @@ class Model_Drawing:
       layer = layers[x]
       if to is None :
         to = "%s-east"%self.cur_layer
-        offset = "(1,0,0)"
+        # offset = "(1,0,0)"
       if to != '(0,0,0)':
         to = f_n(to)
       self.arch.append( to_Conv( name=layer,             # The name of the layer for internal use
